@@ -26,5 +26,11 @@ export const authStore = {
 };
 
 export function useAuthStore() {
-  return useSyncExternalStore(authStore.subscribe, authStore.getState);
+  // Provide a server snapshot function (same as getState) to satisfy
+  // server-rendering requirements of `useSyncExternalStore`.
+  return useSyncExternalStore(
+    authStore.subscribe,
+    authStore.getState,
+    authStore.getState,
+  );
 }
