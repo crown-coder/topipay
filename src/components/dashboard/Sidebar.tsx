@@ -63,7 +63,7 @@ const navSections = [
 export default function Sidebar() {
   const pathname = usePathname();
   return (
-    <aside className="relative hidden w-64 flex-col overflow-hidden border-r border-slate-200 bg-[url('/assets/sidebar-bg.png')] bg-cover bg-center px-6 py-8 md:flex">
+    <aside className="relative hidden h-screen w-64 flex-col overflow-hidden border-r border-slate-200 bg-[url('/assets/sidebar-bg.png')] bg-cover bg-center px-6 py-8 md:flex">
       {/* <div className="absolute inset-0 bg-slate-950/10" /> */}
       <div className="relative z-10">
         <div className="text-sm uppercase tracking-[0.3em] text-slate-500">

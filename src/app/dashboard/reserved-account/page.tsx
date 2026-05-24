@@ -32,7 +32,7 @@ export default function ReservedAccountPage() {
         </header>
 
         <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-3xl border border-blue-100/80 bg-gradient-to-br from-white via-white to-blue-50/70 p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-500">Total collections</p>
@@ -49,13 +49,25 @@ export default function ReservedAccountPage() {
             </div>
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
               {[
-                { label: "Today", value: "$18,420" },
-                { label: "This week", value: "$102,880" },
-                { label: "Success rate", value: "99.2%" },
+                {
+                  label: "Today",
+                  value: "$18,420",
+                  tone: "border-blue-200/70 bg-blue-50/60",
+                },
+                {
+                  label: "This week",
+                  value: "$102,880",
+                  tone: "border-emerald-200/70 bg-emerald-50/60",
+                },
+                {
+                  label: "Success rate",
+                  value: "99.2%",
+                  tone: "border-indigo-200/70 bg-indigo-50/60",
+                },
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3"
+                  className={`rounded-2xl border px-4 py-3 ${item.tone}`}
                 >
                   <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
                     {item.label}

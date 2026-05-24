@@ -36,7 +36,7 @@ export default function WalletPage() {
         </header>
 
         <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-3xl border border-blue-100/80 bg-gradient-to-br from-white via-white to-blue-50/70 p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-500">Available balance</p>
@@ -51,13 +51,25 @@ export default function WalletPage() {
             </div>
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
               {[
-                { label: "Pending", value: "$4,210.40" },
-                { label: "Reserved", value: "$2,890.00" },
-                { label: "Payout limit", value: "$120,000" },
+                {
+                  label: "Pending",
+                  value: "$4,210.40",
+                  tone: "border-amber-200/70 bg-amber-50/60",
+                },
+                {
+                  label: "Reserved",
+                  value: "$2,890.00",
+                  tone: "border-blue-200/70 bg-blue-50/60",
+                },
+                {
+                  label: "Payout limit",
+                  value: "$120,000",
+                  tone: "border-emerald-200/70 bg-emerald-50/60",
+                },
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3"
+                  className={`rounded-2xl border px-4 py-3 ${item.tone}`}
                 >
                   <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
                     {item.label}
@@ -119,7 +131,7 @@ export default function WalletPage() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="rounded-3xl border border-emerald-100/70 bg-emerald-50/30 p-6 shadow-sm">
               <h3 className="text-lg font-semibold text-slate-900">
                 Funding health
               </h3>
@@ -185,7 +197,7 @@ export default function WalletPage() {
             </div>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-3xl border border-blue-100/70 bg-blue-50/40 p-6 shadow-sm">
             <h3 className="text-lg font-semibold text-slate-900">
               Treasury insights
             </h3>

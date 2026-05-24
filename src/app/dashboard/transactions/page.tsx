@@ -234,7 +234,7 @@ export default function TransactionsPage() {
             </select>
           </label>
           <div className="flex items-center gap-3 text-sm text-slate-500">
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
               {filtered.length} results
             </span>
           </div>
@@ -243,26 +243,35 @@ export default function TransactionsPage() {
 
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="grid gap-4 lg:grid-cols-3">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-              Processed today
-            </p>
-            <p className="mt-2 text-lg font-semibold text-slate-900">$28,420</p>
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-              Settled this week
-            </p>
-            <p className="mt-2 text-lg font-semibold text-slate-900">
-              $134,880
-            </p>
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-              Failed payments
-            </p>
-            <p className="mt-2 text-lg font-semibold text-slate-900">12</p>
-          </div>
+          {[
+            {
+              label: "Processed today",
+              value: "$28,420",
+              tone: "border-blue-200/70 bg-blue-50/70",
+            },
+            {
+              label: "Settled this week",
+              value: "$134,880",
+              tone: "border-emerald-200/70 bg-emerald-50/70",
+            },
+            {
+              label: "Failed payments",
+              value: "12",
+              tone: "border-rose-200/70 bg-rose-50/70",
+            },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className={`rounded-2xl border px-4 py-4 ${stat.tone}`}
+            >
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+                {stat.label}
+              </p>
+              <p className="mt-2 text-lg font-semibold text-slate-900">
+                {stat.value}
+              </p>
+            </div>
+          ))}
         </div>
         <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200">
           <div className="grid grid-cols-5 gap-4 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">

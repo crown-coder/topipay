@@ -12,7 +12,6 @@ let state: AuthState = {
 };
 
 const listeners = new Set<() => void>();
-
 export const authStore = {
   getState: () => state,
   setState: (next: Partial<AuthState>) => {

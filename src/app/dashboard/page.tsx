@@ -74,7 +74,7 @@ export default function DashboardPage() {
               <BalanceCard balance={12480.55} currency="USD" />
             </MotionItem>
             <MotionItem>
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="rounded-3xl border border-blue-100/80 bg-gradient-to-br from-white via-white to-blue-50/70 p-6 shadow-sm">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-slate-900">
                     Payment volume
@@ -107,7 +107,7 @@ export default function DashboardPage() {
               <KycStatusCard />
             </MotionItem>
             <MotionItem>
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="rounded-3xl border border-indigo-100/70 bg-indigo-50/40 p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-slate-900">
                   Quick actions
                 </h3>
@@ -121,7 +121,7 @@ export default function DashboardPage() {
               </div>
             </MotionItem>
             <MotionItem>
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="rounded-3xl border border-emerald-100/70 bg-emerald-50/30 p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-slate-900">
                   Risk signals
                 </h3>

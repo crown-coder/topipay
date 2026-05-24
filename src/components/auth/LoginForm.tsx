@@ -55,8 +55,35 @@ export default function LoginForm() {
     router.push("/dashboard");
   };
 
+  const handleGoogleLogin = () => {
+    login({
+      id: "user_google_01",
+      name: "Sadiq",
+      email: "avery@google.com",
+    });
+    router.push("/dashboard");
+  };
+
   return (
     <>
+      <div className="space-y-4">
+        <Button
+          className="w-full"
+          variant="google"
+          type="button"
+          onClick={handleGoogleLogin}
+        >
+          <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs font-semibold text-[#4285F4]">
+            G
+          </span>
+          Continue with Google
+        </Button>
+        <div className="flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-slate-400">
+          <span className="h-px flex-1 bg-slate-200" />
+          or
+          <span className="h-px flex-1 bg-slate-200" />
+        </div>
+      </div>
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <Input
           label="Work email"

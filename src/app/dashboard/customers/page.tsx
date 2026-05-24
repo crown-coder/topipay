@@ -181,13 +181,25 @@ export default function CustomersPage() {
 
       <section className="grid gap-6 lg:grid-cols-3">
         {[
-          { label: "Active customers", value: "412" },
-          { label: "Monthly volume", value: "$1.24M" },
-          { label: "At-risk accounts", value: "18" },
+          {
+            label: "Active customers",
+            value: "412",
+            tone: "border-emerald-200/70 bg-emerald-50/60",
+          },
+          {
+            label: "Monthly volume",
+            value: "$1.24M",
+            tone: "border-blue-200/70 bg-blue-50/60",
+          },
+          {
+            label: "At-risk accounts",
+            value: "18",
+            tone: "border-amber-200/70 bg-amber-50/60",
+          },
         ].map((stat) => (
           <div
             key={stat.label}
-            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+            className={`rounded-3xl border p-6 shadow-sm ${stat.tone}`}
           >
             <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
               {stat.label}
@@ -224,7 +236,7 @@ export default function CustomersPage() {
               <option value="Inactive">Inactive</option>
             </select>
           </label>
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
             {filtered.length} results
           </span>
         </div>

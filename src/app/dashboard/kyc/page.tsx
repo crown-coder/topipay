@@ -6,21 +6,25 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
-import { MotionItem, MotionPage, MotionStagger } from "@/components/ui/Motion";
+import { MotionItem, MotionPage } from "@/components/ui/Motion";
 import { setKycStatus, submitKyc } from "@/lib/api";
 import {
+  accountSchema,
+  boardSchema,
+  bvnSchema,
   businessSchema,
-  documentsSchema,
-  ownerSchema,
+  registrationSchema,
+  type AccountFormValues,
+  type BoardFormValues,
+  type BvnFormValues,
   type BusinessFormValues,
-  type DocumentsFormValues,
-  type OwnerFormValues,
+  type RegistrationFormValues,
 } from "@/lib/validations/kyc";
 import type { KycProfile, KycStatus } from "@/types";
 import { cn } from "@/lib/utils";
 import { loadKycDraft, saveKycDraft } from "@/lib/kycStorage";
 
-const steps = ["Business", "Owner", "Documents", "Review"] as const;
+const steps = ["Business", "Account", "BVN", "Board", "Registration"] as const;
 
 type StepKey = (typeof steps)[number];
 
@@ -34,38 +38,50 @@ const stepConfig: StepConfig[] = [
   {
     key: "Business",
     title: "Business details",
-    description: "Tell us about your company and registration details.",
+    description: "Provide your business identity and address details.",
   },
   {
-    key: "Owner",
-    title: "Owner information",
-    description: "Provide the primary owner or director details.",
+    key: "Account",
+    title: "Account information",
+    description: "Add the settlement account for collections.",
   },
   {
-    key: "Documents",
-    title: "Verification documents",
-    description: "Add a government-issued ID for verification.",
+    key: "BVN",
+    title: "BVN information",
+    description: "Provide your BVN and registered phone number.",
   },
   {
-    key: "Review",
-    title: "Review and submit",
-    description: "Confirm the details before submitting for review.",
+    key: "Board",
+    title: "Board member information",
+    description: "Upload NIN card and recent utility bill.",
+  },
+  {
+    key: "Registration",
+    title: "Business registration documents",
+    description: "Upload statutory and incorporation documents.",
   },
 ];
 
 const emptyProfile: KycProfile = {
-  businessName: "",
-  businessType: "",
-  registrationNumber: "",
-  country: "",
-  website: "",
-  ownerName: "",
-  ownerEmail: "",
-  ownerPhone: "",
-  ownerIdNumber: "",
-  documentType: "",
-  documentNumber: "",
-  consent: false,
+  businessInformation: "",
+  businessCountry: "",
+  businessState: "",
+  businessLga: "",
+  businessAddress: "",
+  businessWebsite: "",
+  businessLogo: "",
+  socialMedia: "",
+  bankSearch: "",
+  accountNumber: "",
+  bvn: "",
+  bvnPhone: "",
+  nin: "",
+  ninCardFile: "",
+  utilityBillFile: "",
+  boardResolutionFile: "",
+  cacDocumentFile: "",
+  companyProfileFile: "",
+  memorandumFile: "",
 };
 
 export default function KycPage() {
@@ -81,38 +97,62 @@ export default function KycPage() {
     resolver: zodResolver(businessSchema),
     defaultValues: useMemo(
       () => ({
-        businessName: draft.businessName,
-        businessType: draft.businessType,
-        registrationNumber: draft.registrationNumber,
-        country: draft.country,
-        website: draft.website,
+        businessInformation: draft.businessInformation,
+        businessCountry: draft.businessCountry,
+        businessState: draft.businessState,
+        businessLga: draft.businessLga,
+        businessAddress: draft.businessAddress,
+        businessWebsite: draft.businessWebsite,
+        socialMedia: draft.socialMedia,
       }),
       [draft],
     ),
     mode: "onBlur",
   });
 
-  const ownerForm = useForm<OwnerFormValues>({
-    resolver: zodResolver(ownerSchema),
+  const accountForm = useForm<AccountFormValues>({
+    resolver: zodResolver(accountSchema),
     defaultValues: useMemo(
       () => ({
-        ownerName: draft.ownerName,
-        ownerEmail: draft.ownerEmail,
-        ownerPhone: draft.ownerPhone,
-        ownerIdNumber: draft.ownerIdNumber,
+        bankSearch: draft.bankSearch,
+        accountNumber: draft.accountNumber,
       }),
       [draft],
     ),
     mode: "onBlur",
   });
 
-  const documentsForm = useForm<DocumentsFormValues>({
-    resolver: zodResolver(documentsSchema),
+  const bvnForm = useForm<BvnFormValues>({
+    resolver: zodResolver(bvnSchema),
     defaultValues: useMemo(
       () => ({
-        documentType: draft.documentType,
-        documentNumber: draft.documentNumber,
-        consent: draft.consent,
+        bvn: draft.bvn,
+        bvnPhone: draft.bvnPhone,
+      }),
+      [draft],
+    ),
+    mode: "onBlur",
+  });
+
+  const boardForm = useForm<BoardFormValues>({
+    resolver: zodResolver(boardSchema),
+    defaultValues: useMemo(
+      () => ({
+        nin: draft.nin,
+      }),
+      [draft],
+    ),
+    mode: "onBlur",
+  });
+
+  const registrationForm = useForm<RegistrationFormValues>({
+    resolver: zodResolver(registrationSchema),
+    defaultValues: useMemo(
+      () => ({
+        boardResolutionFile: undefined,
+        cacDocumentFile: undefined,
+        companyProfileFile: undefined,
+        memorandumFile: undefined,
       }),
       [draft],
     ),
@@ -132,29 +172,49 @@ export default function KycPage() {
   useEffect(() => {
     if (stepIndex === 0) {
       businessForm.reset({
-        businessName: draft.businessName,
-        businessType: draft.businessType,
-        registrationNumber: draft.registrationNumber,
-        country: draft.country,
-        website: draft.website,
+        businessInformation: draft.businessInformation,
+        businessCountry: draft.businessCountry,
+        businessState: draft.businessState,
+        businessLga: draft.businessLga,
+        businessAddress: draft.businessAddress,
+        businessWebsite: draft.businessWebsite,
+        socialMedia: draft.socialMedia,
       });
     }
     if (stepIndex === 1) {
-      ownerForm.reset({
-        ownerName: draft.ownerName,
-        ownerEmail: draft.ownerEmail,
-        ownerPhone: draft.ownerPhone,
-        ownerIdNumber: draft.ownerIdNumber,
+      accountForm.reset({
+        bankSearch: draft.bankSearch,
+        accountNumber: draft.accountNumber,
       });
     }
     if (stepIndex === 2) {
-      documentsForm.reset({
-        documentType: draft.documentType,
-        documentNumber: draft.documentNumber,
-        consent: draft.consent,
+      bvnForm.reset({
+        bvn: draft.bvn,
+        bvnPhone: draft.bvnPhone,
       });
     }
-  }, [stepIndex, draft, businessForm, ownerForm, documentsForm]);
+    if (stepIndex === 3) {
+      boardForm.reset({
+        nin: draft.nin,
+      });
+    }
+    if (stepIndex === 4) {
+      registrationForm.reset({
+        boardResolutionFile: undefined,
+        cacDocumentFile: undefined,
+        companyProfileFile: undefined,
+        memorandumFile: undefined,
+      });
+    }
+  }, [
+    stepIndex,
+    draft,
+    businessForm,
+    accountForm,
+    bvnForm,
+    boardForm,
+    registrationForm,
+  ]);
 
   const persistDraft = (
     nextDraft: KycProfile,
@@ -177,38 +237,101 @@ export default function KycPage() {
   };
 
   const handleBusinessNext = (values: BusinessFormValues) => {
-    const nextDraft = { ...draft, ...values };
+    const nextDraft = {
+      ...draft,
+      businessInformation: values.businessInformation,
+      businessCountry: values.businessCountry,
+      businessState: values.businessState,
+      businessLga: values.businessLga,
+      businessAddress: values.businessAddress,
+      businessWebsite: values.businessWebsite ?? "",
+      socialMedia: values.socialMedia ?? "",
+      businessLogo: values.businessLogo?.item(0)?.name ?? draft.businessLogo,
+    };
     setDraft(nextDraft);
     setStepIndex(1);
     persistDraft(nextDraft, 1, status);
   };
 
-  const handleOwnerNext = (values: OwnerFormValues) => {
+  const handleDemoNext = (nextStep: number, nextDraft: KycProfile) => {
+    setDraft(nextDraft);
+    setStepIndex(nextStep);
+    persistDraft(nextDraft, nextStep, status);
+  };
+
+  const handleAccountNext = (values: AccountFormValues) => {
     const nextDraft = { ...draft, ...values };
     setDraft(nextDraft);
     setStepIndex(2);
     persistDraft(nextDraft, 2, status);
   };
 
-  const handleDocumentsNext = (values: DocumentsFormValues) => {
+  const handleBvnNext = (values: BvnFormValues) => {
     const nextDraft = { ...draft, ...values };
     setDraft(nextDraft);
     setStepIndex(3);
     persistDraft(nextDraft, 3, status);
   };
 
-  const handleSubmit = async () => {
-    setSubmitError(null);
-    try {
-      const nextStatus = await submitKyc(draft);
-      setStatus(nextStatus);
-      persistDraft(draft, stepIndex, nextStatus);
-    } catch (error) {
-      setSubmitError(
-        error instanceof Error
-          ? error.message
-          : "Unable to submit KYC details.",
-      );
+  const handleBoardNext = (values: BoardFormValues) => {
+    const nextDraft = {
+      ...draft,
+      nin: values.nin,
+      ninCardFile: values.ninCardFile?.item(0)?.name ?? draft.ninCardFile,
+      utilityBillFile:
+        values.utilityBillFile?.item(0)?.name ?? draft.utilityBillFile,
+    };
+    setDraft(nextDraft);
+    setStepIndex(4);
+    persistDraft(nextDraft, 4, status);
+  };
+
+  const handleRegistrationNext = (values: RegistrationFormValues) => {
+    const nextDraft = {
+      ...draft,
+      boardResolutionFile:
+        values.boardResolutionFile?.item(0)?.name ?? draft.boardResolutionFile,
+      cacDocumentFile:
+        values.cacDocumentFile?.item(0)?.name ?? draft.cacDocumentFile,
+      companyProfileFile:
+        values.companyProfileFile?.item(0)?.name ?? draft.companyProfileFile,
+      memorandumFile:
+        values.memorandumFile?.item(0)?.name ?? draft.memorandumFile,
+    };
+    setDraft(nextDraft);
+    persistDraft(nextDraft, 4, status);
+  };
+
+  const handleRegistrationSubmit = async (
+    values: RegistrationFormValues,
+    submitNow: boolean,
+  ) => {
+    const nextDraft = {
+      ...draft,
+      boardResolutionFile:
+        values.boardResolutionFile?.item(0)?.name ?? draft.boardResolutionFile,
+      cacDocumentFile:
+        values.cacDocumentFile?.item(0)?.name ?? draft.cacDocumentFile,
+      companyProfileFile:
+        values.companyProfileFile?.item(0)?.name ?? draft.companyProfileFile,
+      memorandumFile:
+        values.memorandumFile?.item(0)?.name ?? draft.memorandumFile,
+    };
+    setDraft(nextDraft);
+    persistDraft(nextDraft, 4, status);
+    if (submitNow) {
+      setSubmitError(null);
+      try {
+        const nextStatus = await submitKyc(nextDraft);
+        setStatus(nextStatus);
+        persistDraft(nextDraft, stepIndex, nextStatus);
+      } catch (error) {
+        setSubmitError(
+          error instanceof Error
+            ? error.message
+            : "Unable to submit KYC details.",
+        );
+      }
     }
   };
 
@@ -219,6 +342,14 @@ export default function KycPage() {
   };
 
   const isSubmitted = status === "pending" || status === "approved";
+  const statusTone =
+    status === "approved"
+      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+      : status === "pending"
+        ? "border-amber-200 bg-amber-50 text-amber-700"
+        : status === "rejected"
+          ? "border-rose-200 bg-rose-50 text-rose-700"
+          : "border-slate-200 bg-slate-100 text-slate-600";
 
   return (
     <MotionPage className="space-y-8">
@@ -234,6 +365,14 @@ export default function KycPage() {
             Complete the onboarding checklist to unlock higher limits and payout
             access.
           </p>
+          <span
+            className={cn(
+              "inline-flex w-fit items-center rounded-full border px-3 py-1 text-xs font-semibold",
+              statusTone,
+            )}
+          >
+            Status: {status.replace("_", " ")}
+          </span>
           {savedAt ? (
             <p className="text-xs text-slate-500">
               Draft saved {new Date(savedAt).toLocaleString()}
@@ -243,7 +382,7 @@ export default function KycPage() {
       </MotionItem>
 
       <MotionItem>
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-3xl border border-blue-100/80 bg-gradient-to-br from-white via-white to-blue-50/60 p-6 shadow-sm">
           <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
             <aside className="space-y-3">
               {stepConfig.map((step, index) => (
@@ -277,7 +416,7 @@ export default function KycPage() {
                 <p className="text-sm text-slate-600">
                   {currentStep.description}
                 </p>
-                <div className="mt-4 flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                <div className="mt-4 flex flex-wrap items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50/70 px-3 py-2 text-xs text-slate-600">
                   <span className="font-semibold text-slate-700">
                     Mock status:
                   </span>
@@ -310,57 +449,91 @@ export default function KycPage() {
                   className="space-y-4"
                   onSubmit={businessForm.handleSubmit(handleBusinessNext)}
                 >
-                  <Input
-                    label="Business name"
-                    placeholder="TopiPay Limited"
-                    error={businessForm.formState.errors.businessName?.message}
-                    {...businessForm.register("businessName")}
-                  />
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <label className="flex flex-col gap-2 text-sm text-slate-700">
-                      <span className="font-medium text-slate-900">
-                        Business type
+                  <label className="flex flex-col gap-2 text-sm text-slate-700">
+                    <span className="font-medium text-slate-900">
+                      Business information
+                    </span>
+                    <textarea
+                      className="min-h-[110px] rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      placeholder="Describe what your business does"
+                      {...businessForm.register("businessInformation")}
+                    />
+                    {businessForm.formState.errors.businessInformation
+                      ?.message ? (
+                      <span className="text-xs text-rose-600">
+                        {
+                          businessForm.formState.errors.businessInformation
+                            ?.message
+                        }
                       </span>
-                      <select
-                        className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                        {...businessForm.register("businessType")}
-                      >
-                        <option value="">Select type</option>
-                        <option value="llc">LLC</option>
-                        <option value="corporation">Corporation</option>
-                        <option value="sole">Sole proprietorship</option>
-                        <option value="partnership">Partnership</option>
-                      </select>
-                      {businessForm.formState.errors.businessType?.message ? (
-                        <span className="text-xs text-rose-600">
-                          {businessForm.formState.errors.businessType?.message}
-                        </span>
-                      ) : null}
-                    </label>
+                    ) : null}
+                  </label>
+                  <div className="grid gap-4 md:grid-cols-2">
                     <Input
-                      label="Registration number"
-                      placeholder="RC-102933"
+                      label="Country of business"
+                      placeholder="Nigeria"
                       error={
-                        businessForm.formState.errors.registrationNumber
-                          ?.message
+                        businessForm.formState.errors.businessCountry?.message
                       }
-                      {...businessForm.register("registrationNumber")}
+                      {...businessForm.register("businessCountry")}
+                    />
+                    <Input
+                      label="State of business"
+                      placeholder="Lagos"
+                      error={
+                        businessForm.formState.errors.businessState?.message
+                      }
+                      {...businessForm.register("businessState")}
                     />
                   </div>
                   <div className="grid gap-4 md:grid-cols-2">
                     <Input
-                      label="Country"
-                      placeholder="United States"
-                      error={businessForm.formState.errors.country?.message}
-                      {...businessForm.register("country")}
+                      label="Local government area"
+                      placeholder="Ikeja"
+                      error={businessForm.formState.errors.businessLga?.message}
+                      {...businessForm.register("businessLga")}
                     />
                     <Input
-                      label="Website"
-                      placeholder="https://topipay.co"
-                      error={businessForm.formState.errors.website?.message}
-                      {...businessForm.register("website")}
+                      label="Business address"
+                      placeholder="12, Obafemi Awolowo Way"
+                      error={
+                        businessForm.formState.errors.businessAddress?.message
+                      }
+                      {...businessForm.register("businessAddress")}
                     />
                   </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Input
+                      label="Business website"
+                      placeholder="https://topipay.co"
+                      error={
+                        businessForm.formState.errors.businessWebsite?.message
+                      }
+                      {...businessForm.register("businessWebsite")}
+                    />
+                    <Input
+                      label="Social media (optional)"
+                      placeholder="https://linkedin.com/company/topipay"
+                      error={businessForm.formState.errors.socialMedia?.message}
+                      {...businessForm.register("socialMedia")}
+                    />
+                  </div>
+                  <label className="flex flex-col gap-2 text-sm text-slate-700">
+                    <span className="font-medium text-slate-900">
+                      Business logo upload
+                    </span>
+                    <input
+                      type="file"
+                      accept=".png,.jpg,.jpeg"
+                      className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm"
+                      {...businessForm.register("businessLogo")}
+                    />
+                    {businessForm.formState.errors.businessLogo?.message ? (
+                      <span className="text-xs text-rose-600">
+                        {businessForm.formState.errors.businessLogo?.message}
+                      </span>
+                    ) : null}
+                  </label>
                   <div className="flex justify-between gap-3">
                     <Button
                       type="button"
@@ -369,10 +542,28 @@ export default function KycPage() {
                         saveAndExit({
                           ...draft,
                           ...businessForm.getValues(),
+                          businessLogo:
+                            businessForm.getValues().businessLogo?.item(0)
+                              ?.name ?? draft.businessLogo,
                         })
                       }
                     >
                       Save & exit
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() =>
+                        handleDemoNext(1, {
+                          ...draft,
+                          ...businessForm.getValues(),
+                          businessLogo:
+                            businessForm.getValues().businessLogo?.item(0)
+                              ?.name ?? draft.businessLogo,
+                        })
+                      }
+                    >
+                      Skip for demo
                     </Button>
                     <Button type="submit">Continue</Button>
                   </div>
@@ -382,34 +573,19 @@ export default function KycPage() {
               {stepIndex === 1 ? (
                 <form
                   className="space-y-4"
-                  onSubmit={ownerForm.handleSubmit(handleOwnerNext)}
+                  onSubmit={accountForm.handleSubmit(handleAccountNext)}
                 >
                   <Input
-                    label="Owner full name"
-                    placeholder="Avery Jordan"
-                    error={ownerForm.formState.errors.ownerName?.message}
-                    {...ownerForm.register("ownerName")}
+                    label="Search bank"
+                    placeholder="Search bank"
+                    error={accountForm.formState.errors.bankSearch?.message}
+                    {...accountForm.register("bankSearch")}
                   />
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <Input
-                      label="Owner email"
-                      type="email"
-                      placeholder="avery@topipay.com"
-                      error={ownerForm.formState.errors.ownerEmail?.message}
-                      {...ownerForm.register("ownerEmail")}
-                    />
-                    <Input
-                      label="Owner phone"
-                      placeholder="+1 555 041 9988"
-                      error={ownerForm.formState.errors.ownerPhone?.message}
-                      {...ownerForm.register("ownerPhone")}
-                    />
-                  </div>
                   <Input
-                    label="Government ID number"
-                    placeholder="A12349002"
-                    error={ownerForm.formState.errors.ownerIdNumber?.message}
-                    {...ownerForm.register("ownerIdNumber")}
+                    label="Account number"
+                    placeholder="0123456789"
+                    error={accountForm.formState.errors.accountNumber?.message}
+                    {...accountForm.register("accountNumber")}
                   />
                   <div className="flex justify-between gap-3">
                     <Button
@@ -425,11 +601,23 @@ export default function KycPage() {
                       onClick={() =>
                         saveAndExit({
                           ...draft,
-                          ...ownerForm.getValues(),
+                          ...accountForm.getValues(),
                         })
                       }
                     >
                       Save & exit
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() =>
+                        handleDemoNext(2, {
+                          ...draft,
+                          ...accountForm.getValues(),
+                        })
+                      }
+                    >
+                      Skip for demo
                     </Button>
                     <Button type="submit">Continue</Button>
                   </div>
@@ -439,59 +627,20 @@ export default function KycPage() {
               {stepIndex === 2 ? (
                 <form
                   className="space-y-4"
-                  onSubmit={documentsForm.handleSubmit(handleDocumentsNext)}
+                  onSubmit={bvnForm.handleSubmit(handleBvnNext)}
                 >
-                  <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600">
-                    Uploading is mocked for now. Provide a document type and
-                    reference to continue.
-                  </div>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <label className="flex flex-col gap-2 text-sm text-slate-700">
-                      <span className="font-medium text-slate-900">
-                        Document type
-                      </span>
-                      <select
-                        className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                        {...documentsForm.register("documentType")}
-                      >
-                        <option value="">Select type</option>
-                        <option value="passport">Passport</option>
-                        <option value="drivers_license">
-                          Driver's license
-                        </option>
-                        <option value="national_id">National ID</option>
-                      </select>
-                      {documentsForm.formState.errors.documentType?.message ? (
-                        <span className="text-xs text-rose-600">
-                          {documentsForm.formState.errors.documentType?.message}
-                        </span>
-                      ) : null}
-                    </label>
-                    <Input
-                      label="Document reference"
-                      placeholder="ID-2026-0021"
-                      error={
-                        documentsForm.formState.errors.documentNumber?.message
-                      }
-                      {...documentsForm.register("documentNumber")}
-                    />
-                  </div>
-                  <label className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-600">
-                    <input
-                      type="checkbox"
-                      className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500/30"
-                      {...documentsForm.register("consent")}
-                    />
-                    <span>
-                      I confirm the information provided is accurate and I am
-                      authorized to submit these documents.
-                    </span>
-                  </label>
-                  {documentsForm.formState.errors.consent?.message ? (
-                    <p className="text-xs text-rose-600">
-                      {documentsForm.formState.errors.consent?.message}
-                    </p>
-                  ) : null}
+                  <Input
+                    label="BVN"
+                    placeholder="12345678901"
+                    error={bvnForm.formState.errors.bvn?.message}
+                    {...bvnForm.register("bvn")}
+                  />
+                  <Input
+                    label="Phone number"
+                    placeholder="+234 802 123 4567"
+                    error={bvnForm.formState.errors.bvnPhone?.message}
+                    {...bvnForm.register("bvnPhone")}
+                  />
                   <div className="flex justify-between gap-3">
                     <Button
                       type="button"
@@ -506,11 +655,23 @@ export default function KycPage() {
                       onClick={() =>
                         saveAndExit({
                           ...draft,
-                          ...documentsForm.getValues(),
+                          ...bvnForm.getValues(),
                         })
                       }
                     >
                       Save & exit
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() =>
+                        handleDemoNext(3, {
+                          ...draft,
+                          ...bvnForm.getValues(),
+                        })
+                      }
+                    >
+                      Skip for demo
                     </Button>
                     <Button type="submit">Continue</Button>
                   </div>
@@ -518,36 +679,48 @@ export default function KycPage() {
               ) : null}
 
               {stepIndex === 3 ? (
-                <div className="space-y-6">
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-                    <p className="font-semibold text-slate-900">
-                      Review details
-                    </p>
-                    <div className="mt-3 grid gap-2 text-xs">
-                      <span>Business: {draft.businessName}</span>
-                      <span>Type: {draft.businessType}</span>
-                      <span>Registration: {draft.registrationNumber}</span>
-                      <span>Country: {draft.country}</span>
-                      <span>Website: {draft.website || "-"}</span>
-                      <span>Owner: {draft.ownerName}</span>
-                      <span>Email: {draft.ownerEmail}</span>
-                      <span>Phone: {draft.ownerPhone}</span>
-                      <span>ID Number: {draft.ownerIdNumber}</span>
-                      <span>Document: {draft.documentType}</span>
-                      <span>Document Ref: {draft.documentNumber}</span>
-                    </div>
-                  </div>
-
-                  {submitError ? (
-                    <p className="text-sm text-rose-600">{submitError}</p>
-                  ) : null}
-
-                  {isSubmitted ? (
-                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
-                      Submission received. Your verification is now {status}.
-                    </div>
-                  ) : null}
-
+                <form
+                  className="space-y-4"
+                  onSubmit={boardForm.handleSubmit(handleBoardNext)}
+                >
+                  <Input
+                    label="NIN"
+                    placeholder="12345678901"
+                    error={boardForm.formState.errors.nin?.message}
+                    {...boardForm.register("nin")}
+                  />
+                  <label className="flex flex-col gap-2 text-sm text-slate-700">
+                    <span className="font-medium text-slate-900">
+                      Valid NIN card (image or pdf)
+                    </span>
+                    <input
+                      type="file"
+                      accept=".png,.jpg,.jpeg,.pdf"
+                      className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm"
+                      {...boardForm.register("ninCardFile")}
+                    />
+                    {boardForm.formState.errors.ninCardFile?.message ? (
+                      <span className="text-xs text-rose-600">
+                        {boardForm.formState.errors.ninCardFile?.message}
+                      </span>
+                    ) : null}
+                  </label>
+                  <label className="flex flex-col gap-2 text-sm text-slate-700">
+                    <span className="font-medium text-slate-900">
+                      Utility bill (image or pdf)
+                    </span>
+                    <input
+                      type="file"
+                      accept=".png,.jpg,.jpeg,.pdf"
+                      className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm"
+                      {...boardForm.register("utilityBillFile")}
+                    />
+                    {boardForm.formState.errors.utilityBillFile?.message ? (
+                      <span className="text-xs text-rose-600">
+                        {boardForm.formState.errors.utilityBillFile?.message}
+                      </span>
+                    ) : null}
+                  </label>
                   <div className="flex justify-between gap-3">
                     <Button
                       type="button"
@@ -559,15 +732,169 @@ export default function KycPage() {
                     <Button
                       type="button"
                       variant="outline"
+                      onClick={() =>
+                        saveAndExit({
+                          ...draft,
+                          ...boardForm.getValues(),
+                          ninCardFile:
+                            boardForm.getValues().ninCardFile?.item(0)?.name ??
+                            draft.ninCardFile,
+                          utilityBillFile:
+                            boardForm.getValues().utilityBillFile?.item(0)
+                              ?.name ?? draft.utilityBillFile,
+                        })
+                      }
+                    >
+                      Save & exit
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() =>
+                        handleDemoNext(4, {
+                          ...draft,
+                          ...boardForm.getValues(),
+                          ninCardFile:
+                            boardForm.getValues().ninCardFile?.item(0)?.name ??
+                            draft.ninCardFile,
+                          utilityBillFile:
+                            boardForm.getValues().utilityBillFile?.item(0)
+                              ?.name ?? draft.utilityBillFile,
+                        })
+                      }
+                    >
+                      Skip for demo
+                    </Button>
+                    <Button type="submit">Continue</Button>
+                  </div>
+                </form>
+              ) : null}
+
+              {stepIndex === 4 ? (
+                <form
+                  className="space-y-4"
+                  onSubmit={registrationForm.handleSubmit((values) =>
+                    handleRegistrationSubmit(values, true),
+                  )}
+                >
+                  <label className="flex flex-col gap-2 text-sm text-slate-700">
+                    <span className="font-medium text-slate-900">
+                      Board resolution (image or pdf)
+                    </span>
+                    <input
+                      type="file"
+                      accept=".png,.jpg,.jpeg,.pdf"
+                      className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm"
+                      {...registrationForm.register("boardResolutionFile")}
+                    />
+                    {registrationForm.formState.errors.boardResolutionFile
+                      ?.message ? (
+                      <span className="text-xs text-rose-600">
+                        {
+                          registrationForm.formState.errors.boardResolutionFile
+                            ?.message
+                        }
+                      </span>
+                    ) : null}
+                  </label>
+                  <label className="flex flex-col gap-2 text-sm text-slate-700">
+                    <span className="font-medium text-slate-900">
+                      CAC document (image or pdf)
+                    </span>
+                    <input
+                      type="file"
+                      accept=".png,.jpg,.jpeg,.pdf"
+                      className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm"
+                      {...registrationForm.register("cacDocumentFile")}
+                    />
+                    {registrationForm.formState.errors.cacDocumentFile
+                      ?.message ? (
+                      <span className="text-xs text-rose-600">
+                        {
+                          registrationForm.formState.errors.cacDocumentFile
+                            ?.message
+                        }
+                      </span>
+                    ) : null}
+                  </label>
+                  <label className="flex flex-col gap-2 text-sm text-slate-700">
+                    <span className="font-medium text-slate-900">
+                      Company profile (image or pdf)
+                    </span>
+                    <input
+                      type="file"
+                      accept=".png,.jpg,.jpeg,.pdf"
+                      className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm"
+                      {...registrationForm.register("companyProfileFile")}
+                    />
+                    {registrationForm.formState.errors.companyProfileFile
+                      ?.message ? (
+                      <span className="text-xs text-rose-600">
+                        {
+                          registrationForm.formState.errors.companyProfileFile
+                            ?.message
+                        }
+                      </span>
+                    ) : null}
+                  </label>
+                  <label className="flex flex-col gap-2 text-sm text-slate-700">
+                    <span className="font-medium text-slate-900">
+                      Memorandum & articles of association (image or pdf)
+                    </span>
+                    <input
+                      type="file"
+                      accept=".png,.jpg,.jpeg,.pdf"
+                      className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm"
+                      {...registrationForm.register("memorandumFile")}
+                    />
+                    {registrationForm.formState.errors.memorandumFile
+                      ?.message ? (
+                      <span className="text-xs text-rose-600">
+                        {
+                          registrationForm.formState.errors.memorandumFile
+                            ?.message
+                        }
+                      </span>
+                    ) : null}
+                  </label>
+                  {submitError ? (
+                    <p className="text-sm text-rose-600">{submitError}</p>
+                  ) : null}
+                  {isSubmitted ? (
+                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
+                      Submission received. Your verification is now {status}.
+                    </div>
+                  ) : null}
+                  <div className="flex justify-between gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setStepIndex(3)}
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
                       onClick={() => saveAndExit(draft)}
                     >
                       Save & exit
                     </Button>
-                    <Button type="button" onClick={handleSubmit}>
-                      Submit for review
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() =>
+                        handleRegistrationSubmit(
+                          registrationForm.getValues(),
+                          true,
+                        )
+                      }
+                    >
+                      Skip for demo
                     </Button>
+                    <Button type="submit">Submit for review</Button>
                   </div>
-                </div>
+                </form>
               ) : null}
             </section>
           </div>

@@ -20,16 +20,23 @@ export type AuthSession = {
 export type KycStatus = "not_started" | "pending" | "approved" | "rejected";
 
 export type KycProfile = {
-  businessName: string;
-  businessType: string;
-  registrationNumber: string;
-  country: string;
-  website: string;
-  ownerName: string;
-  ownerEmail: string;
-  ownerPhone: string;
-  ownerIdNumber: string;
-  documentType: string;
-  documentNumber: string;
-  consent: boolean;
+  businessInformation: string;
+  businessCountry: string;
+  businessState: string;
+  businessLga: string;
+  businessAddress: string;
+  businessWebsite: string;
+  businessLogo: string;
+  socialMedia: string;
+  bankSearch: string;
+  accountNumber: string;
+  bvn: string;
+  bvnPhone: string;
+  nin: string;
+  ninCardFile: string;
+  utilityBillFile: string;
+  boardResolutionFile: string;
+  cacDocumentFile: string;
+  companyProfileFile: string;
+  memorandumFile: string;
 };

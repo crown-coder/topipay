@@ -46,7 +46,7 @@ type OTPResponse = {
 
 const mockUser: User = {
   id: "user_1024",
-  name: "Avery Jordan",
+  name: "Sadiq",
   email: "avery@topipay.com",
 };
 
